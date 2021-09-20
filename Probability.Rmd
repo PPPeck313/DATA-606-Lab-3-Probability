@@ -1,0 +1,104 @@
+---
+title: "DATA 606 - Lab 3 - Probability"
+author: "Preston Peck"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+# Probability
+
+<https://htmlpreview.github.io/?https://github.com/jbryer/DATA606/blob/master/inst/labs/Lab3/Lab3_probability.html>
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(vctrs)
+```
+
+### Exercise 1
+
+A streak of length one indicates that in a consecutive run of shots, starting with a miss, one shot is then made beginning a new consecutive shot count, which will then be followed by another miss, and so only one shot was made in a row.\n
+
+A streak of zero indicates that in a run of consecutive shots, all shots are misses, so the consecutive shots made count is trapped at 0. The moment a shot is made, the streak starts beginning from 1. The moment a shot is then missed, the streak will return to 0, and that streak will remain the active streak until a shot is made. 
+
+### Exercise 2
+
+Kobe's typical shot streak length was 0, which means he missed more than he started hit streaks, however that doesn't necessarily mean that he had more misses overall since one streak can represent many shots made within it. The longest streak he had was making 4 shots in a  row.
+
+```{r streak-lengths}
+kobe_basket$shot
+kobe_streak <- calc_streak(kobe_basket$shot)
+kobe_streak
+
+kobe_streak_counts <- vec_count(kobe_streak)
+kobe_streak_count_totals <- apply(kobe_streak_counts, 1, function(x) x[1] * x[2])
+kobe_streak_counts <- cbind(kobe_streak_counts, totals = kobe_streak_count_totals)
+kobe_streak_counts
+
+total_miss_streaks_and_hits <- data.frame(M_Streaks = kobe_streak_counts[1, 2], H = c(sum(kobe_streak_counts$total)))
+total_miss_streaks_and_hits
+
+total_misses_and_hits <- vec_count(kobe_basket$shot)
+total_misses_and_hits
+
+ggplot(data = kobe_streak, aes(x = length)) +
+  geom_histogram(binwidth = 1)
+
+ggplot(data = kobe_streak, aes(x = length)) +
+  geom_histogram(binwidth = 1, aes(y = ..density..)) +
+  geom_density()
+```
+
+### Exercise 3
+
+The following simulation turns up 79 heads and 21 tails, which is very nearly the 8:2 split.
+
+```{r simulation}
+set.seed(37)
+coin_outcomes <- c("heads", "tails")
+sim_unfair_coin <- sample(coin_outcomes, size = 100, replace = TRUE, prob = c(0.2, 0.8))
+vec_count(sim_unfair_coin)
+```
+
+### Exercise 4
+
+```{r shooting}
+shot_outcomes <- c("H", "M")
+sim_basket <- sample(shot_outcomes, size = 133, replace = TRUE, c(0.45, .55))
+sim_basket
+vec_count(sim_basket)
+```
+
+### Exercise 5
+
+```{r sim-streak}
+sim_streak <- calc_streak(sim_basket)
+sim_streak
+
+total_misses_and_hits <- vec_count(sim_basket)
+total_misses_and_hits
+```
+
+### Exercise 6
+
+The independent player's typical shot streak length was 0, which means he missed more than he started hit streaks. The longest streak they had was making 4 shots in a  row.
+
+```{r sim-streak-lengths}
+sim_streak_counts <- vec_count(sim_streak)
+sim_streak_counts
+
+ggplot(data = sim_streak, aes(x = length)) +
+  geom_histogram(binwidth = 1)
+
+ggplot(data = sim_streak, aes(x = length)) +
+  geom_histogram(binwidth = 1, aes(y = ..density..)) +
+  geom_density()
+```
+
+### Exercise 7
+
+If we were to run this simulation again, we can expect this simulation to return a somewhat similar result (if we factor in the seed, it would be exactly the same). The sample size is large enough that the initial percentages can be adequately expressed.
+
+### Exercise 8
+
+Kobe's distribution of streak lengths is highly similar to that of the independent player's. They were both able to achieve max streaks of 4, and though Kobe had more 3 streaks, the difference in the percentage of streaks greater than 1 (where hot hand dependency would come into play) relative to the total number of streaks is marginal between them.
